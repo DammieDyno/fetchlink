@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+
+<script>
+    fetch('https://restcountries.com/v3.1/all')
+  .then(response => response.json())
+  .then(data => {
+    const tableBody = document.querySelector('#countryTable tbody');
+    data.forEach(country => {
+      const row = document.createElement('tr');
+      const nameCell = document.createElement('td');
+      nameCell.textContent = country.name.common;
+      row.appendChild(nameCell);
+
+      const coatOfArmsCell = document.createElement('td');
+      const coatOfArmsImg = document.createElement('img');
+      coatOfArmsImg.src = country.coatOfArms.png;
+      coatOfArmsCell.appendChild(coatOfArmsImg);
+      row.appendChild(coatOfArmsCell);
+
+      const bordersCell = document.createElement('td');
+      const bordersList = document.createElement('ul');
+      country.borders.forEach(borderCode => {
+        const borderName = data.find(c => c.cca2 === borderCode).name.common;
+        const borderItem = document.createElement('li');
+        borderItem.textContent = borderName;
+        bordersList.appendChild(borderItem);
+      });
+      bordersCell.appendChild(bordersList);
+      row.appendChild(bordersCell);
+
+      tableBody.appendChild(row);
+    });
+  })
+//   .catch(error => {
+//     console.error('Error fetching country data.', error);
+//   });
+</script>
