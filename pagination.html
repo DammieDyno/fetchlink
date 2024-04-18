@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #countryTable {
+            border: 1px solid black;
+        }
+
+        #rowss {
+            border: 1px solid black;
+            text-align: center;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: large;
+        }
+
+        #cols {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 5px;
+            height: 10vh;
+            width: 70vw;
+        }
+
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(5, 1fr);
+            gap: 1px;
+        }
+
+        .grid-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #ddd;
+            border: none;
+            margin: 0 10px;
+        }
+
+        .pagination button:hover {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-container">
+        <table id="countryTable">
+            <tr>
+                <th id="colums">Name</th>
+                <th id="colums">capital</th>
+                <th id="colums">Region</th>
+                <th id="colums">Coat of arm</th>
+            </tr>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <button id="prev">Previous</button>
+        <button id="next">Next</button>
+    </div>
+
+    <script>
+        let arr = []
+        let row;
+        let currentPage = 0;
+        const pageSize = 50;
+
+        function fetching() {
+            fetch("https://restcountries.com/v3.1/all")
+                .then(Response => Response.json())
+                .then(data => {
+                    let countryTable = document.getElementById("countryTable")
+                    data.sort((a, b) => {
+                        if (a.name.common > b.name.common) { return 1 }
+                        else if (b.name.common > a.name.common) {
+                            return -1
+                        } else {
+                            return 0
+                        }
+                    }).forEach((country, index) => {
+                        row = `<tr id="rowss">
+                   <td id="cols">${country.name.common}</td>
+                  <td id="cols">${country.capital ? country.capital[0] : 'N/A'}</td>
+                  <td id="cols">${country.region}</td>
+                  <td id="cols"><img width="50" src="${country.coatOfArms.png}" alt= ""/></td>
+                `
+                        arr.push(row);
+                    });
+                    renderGrid();
+                })
+        }
+
+        function renderGrid() {
+            const startIndex = currentPage* pageSize;
+            const endIndex = startIndex + pageSize;
+            const gridRows = arr.slice(startIndex, endIndex);
+
+            const gridContainer = document.querySelector(".grid-container");
+            gridContainer.innerHTML = "";
+
+            gridRows.forEach(row => {
+                const gridRow = document.createElement("div");
+                gridRow.classList.add("grid-row");
+
+                const gridItem = document.createElement("div");
+                gridItem.classList.add("grid-item");
+                gridItem.innerHTML = row;
+
+                gridRow.appendChild(gridItem);
+                gridContainer.appendChild(gridRow);
+            });
+        }
+
+        document.getElementById("prev").addEventListener("click", () => {
+            currentPage = Math.max(0, currentPage - 1);
+            renderGrid();
+        });
+
+        document.getElementById("next").addEventListener("click", () => {
+            currentPage = Math.min(Math.ceil(arr.length / pageSize) - 1, currentPage + 1);
+            renderGrid();
+        });
+
+        fetching();
+    </script>
+</body>
+
+</html>
